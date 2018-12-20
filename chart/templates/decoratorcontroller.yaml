@@ -1,0 +1,27 @@
+apiVersion: metacontroller.k8s.io/v1alpha1
+kind: DecoratorController
+metadata:
+  name: {{ include "istio-cert-merger.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "istio-cert-merger.name" . }}
+    helm.sh/chart: {{ include "istio-cert-merger.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  resyncPeriodSeconds: {{ .Values.decoratorController.resyncPeriodSeconds }}
+  resources:
+    - apiVersion: medium.com/v1
+      resource: certmergers
+  attachments:
+    - apiVersion: v1
+      resource: secrets
+      updateStrategy:
+        method: Recreate
+    - apiVersion: networking.istio.io/v1alpha3
+      resource: gateways
+      updateStrategy:
+        method: InPlace
+  hooks:
+    sync:
+      webhook:
+        url: http://{{ include "istio-cert-merger.fullname" . }}.{{ .Release.Namespace }}/merge-certs

@@ -1,0 +1,10 @@
+language: go
+go:
+- "1.11"
+install:
+- go get -u github.com/golang/dep/cmd/dep
+- dep ensure
+script:
+- go install github.com/dokipen/istio-cert-merger/cmd/istio-cert-merger
+- make unit-test
+
